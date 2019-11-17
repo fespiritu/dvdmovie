@@ -27,9 +27,12 @@ namespace dvdmovie
             services.AddDbContext<DataContext>(options => options.UseSqlServer(Configuration
                 ["Data:Movies:ConnectionString"]));
 
-            services.AddMvc().AddJsonOptions(opts =>
+            services.AddMvc().AddJsonOptions(opts => {
                 opts.SerializerSettings.ReferenceLoopHandling
-                = ReferenceLoopHandling.Serialize);
+                = ReferenceLoopHandling.Serialize;
+
+                opts.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                });
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 

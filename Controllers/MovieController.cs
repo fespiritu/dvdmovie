@@ -30,7 +30,15 @@ namespace dvdmovie.Controllers
             {
                 if (result.Studio !=null)
                 {
-                    result.Studio.Movies = null;
+                    result.Studio.Movies = result.Studio.Movies.Select(s =>
+                        new Movie
+                        {
+                            MovieId = s.MovieId,
+                            Name = s.Name,
+                            Category = s.Category,
+                            Description = s.Description,
+                            Price = s.Price
+                        });
                 }
                 if(result.Ratings != null)
                 {
@@ -42,10 +50,28 @@ namespace dvdmovie.Controllers
         }
 
         [HttpGet]
-        public List<Movie> GetMovie()
+        public IEnumerable<Movie> GetMovies(bool related = false)
         {
-            return context.Movies.ToList();
+            IQueryable<Movie> query = context.Movies;
+            if (related)
+            {
+                query = query.Include(m => m.Studio).Include(m => m.Ratings);
+                List<Movie> data = query.ToList();
+                data.ForEach(m =>
+                {
+                    if (m.Studio != null) {
+                        m.Studio.Movies = null;
+                    }
+
+                    if (m.Ratings != null)
+                    {
+                        m.Ratings.ForEach(r => r.Movie = null);
+                    }
+                });
+                return data;
+            }
+            return query;
         }
-       
+
     }
 }
